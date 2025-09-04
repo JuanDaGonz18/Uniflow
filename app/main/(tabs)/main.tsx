@@ -1,19 +1,27 @@
-import { LinearGradient } from "expo-linear-gradient";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
-import { useRouter } from "expo-router";
+import { useAuth } from "@/contexts/AuthContext";
+import { CinzelDecorative_400Regular } from "@expo-google-fonts/cinzel-decorative";
 import {
-  PlayfairDisplay_700Bold,
   PlayfairDisplay_400Regular,
+  PlayfairDisplay_700Bold,
 } from "@expo-google-fonts/playfair-display";
 import {
   Poppins_400Regular,
   Poppins_600SemiBold,
   useFonts,
 } from "@expo-google-fonts/poppins";
-import { CinzelDecorative_400Regular } from "@expo-google-fonts/cinzel-decorative";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { saldo, ultimoMovimiento } = useAuth();
 
   const [fontsLoaded] = useFonts({
     PlayfairDisplay_700Bold,
@@ -25,13 +33,16 @@ export default function HomeScreen() {
 
   if (!fontsLoaded) return null;
 
-  // Lista de partidos
   const partidos = [
-    { id: 1, name: "⚽ Barcelona vs Real Madrid" },
-    { id: 2, name: "🔥 PSG vs Manchester City" },
-    { id: 3, name: "🏟️ Boca Juniors vs River Plate" },
-    { id: 4, name: "🇮🇹 Juventus vs AC Milan" },
-    { id: 5, name: "🇩🇪 Bayern vs Borussia Dortmund" },
+    { id: 1, team1: "Barcelona", team2: "Real Madrid" },
+    { id: 2, team1: "PSG", team2: "Manchester City" },
+    { id: 3, team1: "Boca Juniors", team2: "River Plate" },
+  ];
+
+  const juegosCasino = [
+    { id: 1, name: "🎰 Tragamonedas", path: "/main/casino/tragamonedas" },
+    { id: 2, name: "♠️ Póker", path: "/main/casino/poker" },
+    { id: 3, name: "🎲 Ruleta", path: "/main/casino/ruleta" },
   ];
 
   return (
@@ -41,33 +52,72 @@ export default function HomeScreen() {
     >
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.container}>
-          {/* Título principal */}
           <Text style={styles.title}>🏆 Bienvenido a BetApp</Text>
           <Text style={styles.subtitle}>
-            Vive la emoción de tus partidos favoritos
+            Vive la emoción de tus eventos favoritos
           </Text>
 
-          {/* Card de partidos */}
+          {/* Próximos Partidos */}
           <View style={styles.card}>
             <Text style={styles.cardTitle}>🎯 Próximos Partidos</Text>
-
             {partidos.map((partido) => (
               <TouchableOpacity
                 key={partido.id}
                 style={styles.matchButton}
-                onPress={() => router.push(`/partidos/${partido.id}`)} // ✅ ruta correcta
+                onPress={() =>
+                  router.push(
+                    `/partidos/${partido.id}?team1=${encodeURIComponent(
+                      partido.team1
+                    )}&team2=${encodeURIComponent(partido.team2)}`
+                  )
+                }
               >
-                <Text style={styles.cardText}>{partido.name}</Text>
+                <Text style={styles.cardText}>
+                  {partido.team1} vs {partido.team2}
+                </Text>
               </TouchableOpacity>
             ))}
-
-            {/* Botón ver más */}
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => router.push("/main/eventos")}
+            >
               <Text style={styles.buttonText}>Ver todos los eventos</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Footer motivacional */}
+          {/* Sección Casino */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>🎰 Casino Destacado</Text>
+            {juegosCasino.map((juego) => (
+              <TouchableOpacity
+                key={juego.id}
+                style={styles.matchButton}
+                onPress={() => router.push(juego.path)}
+              >
+                <Text style={styles.cardText}>{juego.name}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => router.push("/main/casino")}
+            >
+              <Text style={styles.buttonText}>Explorar Casino</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Sección Cuenta */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>💳 Mi Saldo</Text>
+            <Text style={styles.cardText}>Saldo: ${saldo}</Text>
+            <Text style={styles.cardText}>Último movimiento: {ultimoMovimiento}</Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => router.push("/main/saldo")}
+            >
+              <Text style={styles.buttonText}>Ir al saldo</Text>
+            </TouchableOpacity>
+          </View>
+
           <Text style={styles.footer}>
             ✨ Apuesta con estilo, gana con pasión ✨
           </Text>
@@ -79,19 +129,19 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   background: { flex: 1 },
-  scroll: { flexGrow: 1 },
+  scroll: { flexGrow: 1, paddingBottom: 60 },
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
-    paddingHorizontal: 25,
-    paddingVertical: 40,
+    paddingHorizontal: 20,
+    paddingTop: 50,
   },
   title: {
-    fontSize: 34,
+    fontSize: 36,
     fontFamily: "PlayfairDisplay_700Bold",
     color: "#FFD700",
-    marginBottom: 10,
+    marginBottom: 8,
     textAlign: "center",
     textShadowColor: "#000",
     textShadowOffset: { width: 2, height: 2 },
@@ -107,62 +157,50 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 20,
     padding: 20,
-    borderWidth: 1.5,
-    borderColor: "rgba(255,215,0,0.6)",
-    shadowColor: "#FFD700",
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
+    borderWidth: 1,
+    borderColor: "rgba(255,215,0,0.5)",
     marginBottom: 25,
+    shadowColor: "#FFD700",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
   },
   cardTitle: {
     fontSize: 22,
     fontFamily: "Poppins_600SemiBold",
     color: "#FFD700",
-    marginBottom: 16,
+    marginBottom: 18,
     textAlign: "center",
   },
   matchButton: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    paddingVertical: 14,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,215,0,0.3)",
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    borderRadius: 14,
+    marginBottom: 12,
+    backgroundColor: "rgba(255,255,255,0.08)",
   },
   cardText: {
     fontSize: 16,
     fontFamily: "Poppins_400Regular",
     color: "#fff",
-    textAlign: "center",
   },
   button: {
-    backgroundColor: "#14532d",
-    paddingVertical: 12,
-    borderRadius: 14,
+    backgroundColor: "#FFD700",
+    paddingVertical: 14,
+    borderRadius: 16,
     alignItems: "center",
-    marginTop: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
+    marginTop: 15,
   },
   buttonText: {
-    color: "#FFD700",
+    color: "#0f2027",
     fontSize: 16,
     fontFamily: "Poppins_600SemiBold",
   },
   footer: {
-    marginTop: 35,
+    marginTop: 30,
     fontSize: 14,
     color: "#c8d6c4",
     fontFamily: "CinzelDecorative_400Regular",

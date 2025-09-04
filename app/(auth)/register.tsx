@@ -1,17 +1,7 @@
-import { AuthContext } from "@/contexts/AuthContext"; // 👈 importa tu contexto
-import { CinzelDecorative_400Regular } from "@expo-google-fonts/cinzel-decorative";
-import {
-  PlayfairDisplay_400Regular,
-  PlayfairDisplay_700Bold,
-} from "@expo-google-fonts/playfair-display";
-import {
-  Poppins_400Regular,
-  Poppins_600SemiBold,
-  useFonts,
-} from "@expo-google-fonts/poppins";
+import { useAuth } from "@/contexts/AuthContext";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -21,38 +11,44 @@ import {
 } from "react-native";
 
 export default function RegisterScreen() {
-  const [fontsLoaded] = useFonts({
-    Poppins_400Regular,
-    Poppins_600SemiBold,
-    PlayfairDisplay_700Bold,
-    PlayfairDisplay_400Regular,
-    CinzelDecorative_400Regular,
-  });
-
   const router = useRouter();
-  const { register } = useContext(AuthContext); // 👈 usa la función register
+  const { register } = useAuth();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [name, setName] = useState(""); // 👈 nuevo estado para el nombre
-
-  if (!fontsLoaded) return null;
 
   const handleRegister = async () => {
-    if (!email || !password || password !== confirm || !name) {
-      alert(
-        "Completa todos los campos y asegúrate que las contraseñas coincidan."
-      );
+    if (!name || !email || !password) {
+      alert("Completa todos los campos.");
       return;
     }
 
     try {
-      await register(email, password, name); // 👈 pasamos el nombre
+      // Objeto User mínimo para el registro
+      const newUser = {
+        id: "", // lo genera Supabase
+        email,
+        name,
+        username: email.split("@")[0], // username automático
+        avatar_url: null,
+        bio: null,
+        website: null,
+        location: null,
+        birth_date: null, // ⚠️ importante: null, no ""
+        phone: null,
+        gender: null,
+        role: "CLIENT" as const, // según tu default en DB
+        points: 0,
+        last_active: new Date().toISOString(),
+      };
+
+      await register(newUser, password);
+
       alert("Cuenta creada con éxito 🎉");
       router.replace("/(auth)/login");
     } catch (error: any) {
-      alert(error.message);
+      alert(error.message || "Error creando la cuenta.");
     }
   };
 
@@ -60,10 +56,9 @@ export default function RegisterScreen() {
     <LinearGradient colors={["#092e20", "#041c13"]} style={styles.background}>
       <View style={styles.container}>
         <Text style={styles.title}>Crear cuenta</Text>
-        <Text style={styles.subtitle}>Empieza tu camino ganador </Text>
 
         <TextInput
-          placeholder="Nombre de usuario"
+          placeholder="Nombre completo"
           placeholderTextColor="#c8d6c4"
           style={styles.input}
           value={name}
@@ -74,6 +69,8 @@ export default function RegisterScreen() {
           placeholder="Correo electrónico"
           placeholderTextColor="#c8d6c4"
           style={styles.input}
+          autoCapitalize="none"
+          keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
         />
@@ -85,15 +82,6 @@ export default function RegisterScreen() {
           style={styles.input}
           value={password}
           onChangeText={setPassword}
-        />
-
-        <TextInput
-          placeholder="Confirmar contraseña"
-          placeholderTextColor="#c8d6c4"
-          secureTextEntry
-          style={styles.input}
-          value={confirm}
-          onChangeText={setConfirm}
         />
 
         <TouchableOpacity style={styles.button} onPress={handleRegister}>
@@ -115,9 +103,7 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
+  background: { flex: 1 },
   container: {
     flex: 1,
     justifyContent: "center",
@@ -126,19 +112,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 40,
-    fontFamily: "PlayfairDisplay_700Bold",
     color: "#FFD700",
     marginBottom: 6,
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 8,
-    letterSpacing: 1,
-  },
-  subtitle: {
-    fontSize: 16,
-    fontFamily: "CinzelDecorative_400Regular",
-    color: "#e0e0e0",
-    marginBottom: 30,
+    textAlign: "center",
   },
   input: {
     width: "100%",
@@ -149,7 +125,6 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     color: "#fff",
     fontSize: 16,
-    fontFamily: "Poppins_400Regular",
     borderWidth: 1,
     borderColor: "rgba(255,215,0,0.5)",
   },
@@ -160,26 +135,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     marginTop: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
   },
-  buttonText: {
-    color: "#FFD700",
-    fontSize: 18,
-    fontFamily: "Poppins_600SemiBold",
-    letterSpacing: 0.5,
-  },
-  footerText: {
-    marginTop: 20,
-    color: "#c8d6c4",
-    fontSize: 14,
-    fontFamily: "Poppins_400Regular",
-  },
-  link: {
-    fontFamily: "Poppins_600SemiBold",
-    color: "#FFD700",
-    textDecorationLine: "underline",
-  },
+  buttonText: { color: "#FFD700", fontSize: 18 },
+  footerText: { marginTop: 20, color: "#c8d6c4", fontSize: 14 },
+  link: { color: "#FFD700", textDecorationLine: "underline" },
 });

@@ -1,81 +1,91 @@
-import { CinzelDecorative_400Regular } from "@expo-google-fonts/cinzel-decorative";
-import { PlayfairDisplay_400Regular, PlayfairDisplay_700Bold } from "@expo-google-fonts/playfair-display";
-import { Poppins_400Regular, Poppins_600SemiBold, useFonts } from "@expo-google-fonts/poppins";
-import { LinearGradient } from "expo-linear-gradient";
+import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
   StyleSheet,
+  Text,
   TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
-export default function ResetScreen() {
-  const [fontsLoaded] = useFonts({
-    Poppins_400Regular,
-    Poppins_600SemiBold,
-    PlayfairDisplay_700Bold,
-    PlayfairDisplay_400Regular,
-    CinzelDecorative_400Regular,
-  });
-
+export default function ResetPasswordPage() {
+  const { resetPassword, isLoading } = useAuth();
   const router = useRouter();
+
   const [email, setEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
-  if (!fontsLoaded) return null;
+  const handleReset = async () => {
+    if (!email || !newPassword) {
+      Alert.alert("Error", "Por favor ingresa correo y nueva contraseña.");
+      return;
+    }
 
-  const handleReset = () => {
-    if (email) {
-      alert("Correo de recuperación enviado a " + email);
-      router.replace("/(auth)/login");
-    } else {
-      alert("Por favor ingresa tu correo electrónico.");
+    try {
+      await resetPassword(email, newPassword);
+      Alert.alert("✅ Éxito", "Contraseña actualizada correctamente.");
+      router.push("/(auth)/login");
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
     }
   };
 
   return (
-    <LinearGradient colors={["#092e20", "#041c13"]} style={styles.background}>
+    <View style={styles.background}>
       <View style={styles.container}>
-        {/* Título elegante */}
-        <Text style={styles.title}>Recuperar contraseña</Text>
+        <Text style={styles.title}>🔑 Restablecer contraseña</Text>
         <Text style={styles.subtitle}>
-          Ingresa tu correo y recibe un enlace mágico 
+          Ingresa tu correo y la nueva contraseña
         </Text>
 
-        {/* Input correo */}
         <TextInput
-          placeholder="Correo electrónico"
-          placeholderTextColor="#c8d6c4"
           style={styles.input}
+          placeholder="Correo"
+          placeholderTextColor="#c8d6c4"
           value={email}
           onChangeText={setEmail}
+          keyboardType="email-address"
         />
 
-        {/* Botón enviar */}
-        <TouchableOpacity style={styles.button} onPress={handleReset}>
-          <Text style={styles.buttonText}>Enviar correo de recuperación</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Nueva contraseña"
+          placeholderTextColor="#c8d6c4"
+          value={newPassword}
+          onChangeText={setNewPassword}
+          secureTextEntry
+        />
+
+        <TouchableOpacity
+          style={[styles.button, isLoading && styles.buttonDisabled]}
+          onPress={handleReset}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Cambiar contraseña</Text>
+          )}
         </TouchableOpacity>
 
-        {/* Volver al login */}
-        <Text style={styles.footerText}>
-          ¿Recordaste tu clave?{" "}
-          <Text
-            style={styles.link}
-            onPress={() => router.push("/(auth)/login")}
-          >
-            Inicia sesión
-          </Text>
-        </Text>
+        <TouchableOpacity
+          style={styles.linkButton}
+          onPress={() => router.push("/(auth)/login")}
+        >
+          <Text style={styles.linkText}>⬅ Volver al inicio</Text>
+        </TouchableOpacity>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   background: {
     flex: 1,
+    backgroundColor: "#041c13", // 👈 mismo fondo verde oscuro que usas en Perfil
   },
   container: {
     flex: 1,
@@ -84,63 +94,56 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
   },
   title: {
-    fontSize: 38,
+    fontSize: 32,
     fontFamily: "PlayfairDisplay_700Bold",
     color: "#FFD700",
-    marginBottom: 6,
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 8,
-    letterSpacing: 1,
+    marginBottom: 8,
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 16,
     fontFamily: "CinzelDecorative_400Regular",
-    color: "#e0e0e0",
+    color: "#c8d6c4",
     marginBottom: 30,
     textAlign: "center",
   },
   input: {
     width: "100%",
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    paddingHorizontal: 15,
-    marginBottom: 18,
-    color: "#fff",
     fontSize: 16,
     fontFamily: "Poppins_400Regular",
+    color: "#fff",
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 6,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,215,0,0.5)",
+    borderColor: "rgba(255,215,0,0.3)",
   },
   button: {
-    width: "100%",
     backgroundColor: "#14532d",
-    paddingVertical: 15,
-    borderRadius: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
     alignItems: "center",
-    marginTop: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    marginTop: 15,
+    width: "100%",
+  },
+  buttonDisabled: {
+    backgroundColor: "#0f3d22",
   },
   buttonText: {
     color: "#FFD700",
     fontSize: 16,
     fontFamily: "Poppins_600SemiBold",
-    textAlign: "center",
   },
-  footerText: {
+  linkButton: {
     marginTop: 20,
-    color: "#c8d6c4",
-    fontSize: 14,
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
   },
-  link: {
-    fontFamily: "Poppins_600SemiBold",
+  linkText: {
     color: "#FFD700",
+    fontSize: 15,
+    fontFamily: "Poppins_400Regular",
     textDecorationLine: "underline",
   },
 });

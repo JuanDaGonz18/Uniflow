@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.juanda1809.BetApplication"
     },
     "web": {
       "bundler": "metro",
@@ -36,6 +37,18 @@
       ],
       "expo-font"
     ],
-    "experiments": {}
+    "experiments": {},
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "39a3ddfe-840b-4603-92fc-045b721c7968"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/39a3ddfe-840b-4603-92fc-045b721c7968"
+    }
   }
 }
