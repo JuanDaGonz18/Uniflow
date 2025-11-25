@@ -1,15 +1,18 @@
 {
   "expo": {
-    "name": "BetApplication",
+    "name": "Neura",
     "slug": "BetApplication",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "betapplication",
+    "icon": null,
+    "scheme": "neura",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "y",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +20,11 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.juanda1809.BetApplication"
+      "package": "com.juanda1809.Neura",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -35,7 +42,12 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-audio",
+      "expo-video",
+      "expo-web-browser",
+      "expo-secure-store",
+      "expo-asset"
     ],
     "experiments": {},
     "extra": {
@@ -44,11 +56,10 @@
         "projectId": "39a3ddfe-840b-4603-92fc-045b721c7968"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
-      "url": "https://u.expo.dev/39a3ddfe-840b-4603-92fc-045b721c7968"
-    }
+      "enabled": false
+    },
+    "owner": "juanda1809"
   }
 }

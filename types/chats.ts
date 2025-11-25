@@ -21,3 +21,10 @@ export interface Chat {
   userId2: string;
   messages: Message[];
 }
+
+export interface ChatMessage {
+  id: string;
+  sender: "user" | "bot";
+  text: string;
+}
+
